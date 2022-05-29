@@ -1,0 +1,61 @@
+# ===============================
+# = SERVER
+# ===============================
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: ${CONTEXT_PATH:/api}
+
+# ===============================
+# = LOGGING
+# ===============================
+logging:
+  level:
+    sk.janobono.wci: ${LOG_LEVEL:debug}
+
+spring:
+  # ===============================
+  # = JPA / HIBERNATE
+  # ===============================
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/app}
+    username: ${DB_USER:app}
+    password: ${DB_PASS:app}
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        # format_sql: true
+        enable_lazy_load_no_trans: true
+        event:
+          merge:
+            entity_copy_observer: allow
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    open-in-view: false
+
+  # ===============================
+  # = MAIL
+  # ===============================
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:2525}
+    username: ${MAIL_USER_NAME}
+    password: ${MAIL_USER_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: ${MAIL_TLS_ENABLE:false}
+            required: ${MAIL_TLS_REQUIRED:false}
+          auth: ${MAIL_AUTH:false}
+          connectiontimeout: 180000
+          timeout: 180000
+          writetimeout: 180000
+
+app:
+  issuer: ${TOKEN_ISSUER:wci}
+  jwt-expiration: ${TOKEN_EXPIRES_IN:3600}
+  jwt-private-key: ${TOKEN_PRIVATE_KEY}
+  jwt-public-key: ${TOKEN_PUBLIC_KEY}
