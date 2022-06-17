@@ -59,3 +59,4 @@ app:
   jwt-expiration: ${TOKEN_EXPIRES_IN:3600}
   jwt-private-key: ${TOKEN_PRIVATE_KEY}
   jwt-public-key: ${TOKEN_PUBLIC_KEY}
+  application-name: ${APPLICATION_NAME:WCI}

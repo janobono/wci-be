@@ -22,13 +22,12 @@ import sk.janobono.wci.component.verification.VerificationTokenType;
 import sk.janobono.wci.dal.domain.User;
 import sk.janobono.wci.dal.repository.UserRepository;
 import sk.janobono.wci.service.ApplicationPropertyService;
+import sk.janobono.wci.util.RandomString;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.text.MessageFormat;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -110,17 +109,55 @@ public class AuthApiService {
         return authenticationResponse;
     }
 
-    public AuthenticationResponseSO resetPassword(ResetPasswordRequestSO resetPasswordRequestSO) {
-        LOGGER.debug("resetPassword({})", resetPasswordRequestSO);
+    @Transactional
+    public AuthenticationResponseSO changeEmail(ChangeEmailRequestSO changeEmailRequestSO) {
+        LOGGER.debug("changeEmail({})", changeEmailRequestSO);
+        captcha.checkTokenValid(changeEmailRequestSO.captchaText(), changeEmailRequestSO.captchaToken());
+        if (userRepository.existsByEmail(changeEmailRequestSO.email().toLowerCase())) {
+            throw ApplicationExceptionCode.USER_EMAIL_IS_USED.exception("Email is already taken.");
+        }
+        UserSO userSO = (UserSO) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findById(userSO.id()).orElseThrow(
+                () -> ApplicationExceptionCode.USER_NOT_FOUND.exception("User with id {0} not found.", userSO.id())
+        );
+        checkDisabled(user);
+        if (!passwordEncoder.matches(changeEmailRequestSO.password(), user.getPassword())) {
+            throw ApplicationExceptionCode.INVALID_CREDENTIALS.exception("Invalid credentials.");
+        }
+        user.setEmail(changeEmailRequestSO.email().toLowerCase());
+        user = userRepository.save(user);
+        AuthenticationResponseSO authenticationResponse = createAuthenticationResponse(user);
+        LOGGER.info("changeEmail({}) - {}", changeEmailRequestSO, authenticationResponse);
+        return authenticationResponse;
+    }
+
+    @Transactional
+    public AuthenticationResponseSO changePassword(ChangePasswordRequestSO changePasswordRequestSO) {
+        LOGGER.debug("changePassword({})", changePasswordRequestSO);
+        captcha.checkTokenValid(changePasswordRequestSO.captchaText(), changePasswordRequestSO.captchaToken());
+        UserSO userSO = (UserSO) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findById(userSO.id()).orElseThrow(
+                () -> ApplicationExceptionCode.USER_NOT_FOUND.exception("User with id {0} not found.", userSO.id())
+        );
+        checkDisabled(user);
+        if (!passwordEncoder.matches(changePasswordRequestSO.oldPassword(), user.getPassword())) {
+            throw ApplicationExceptionCode.INVALID_CREDENTIALS.exception("Invalid credentials.");
+        }
+        user.setPassword(passwordEncoder.encode(changePasswordRequestSO.newPassword()));
+        user = userRepository.save(user);
+        AuthenticationResponseSO authenticationResponse = createAuthenticationResponse(user);
+        LOGGER.info("changePassword({}) - {}", changePasswordRequestSO, authenticationResponse);
+        return authenticationResponse;
+    }
+
+    public void resetPassword(Locale locale, ResetPasswordRequestSO resetPasswordRequestSO) {
+        LOGGER.debug("resetPassword({},{})", locale, resetPasswordRequestSO);
         captcha.checkTokenValid(resetPasswordRequestSO.captchaText(), resetPasswordRequestSO.captchaToken());
         User user = userRepository.findByEmail(resetPasswordRequestSO.email().toLowerCase()).orElseThrow(
                 () -> ApplicationExceptionCode.USER_NOT_FOUND.exception("User {0} not found.", resetPasswordRequestSO.email())
         );
         checkDisabled(user);
-        sendResetPasswordMail(resetPasswordRequestSO, user);
-        AuthenticationResponseSO authenticationResponse = createAuthenticationResponse(user);
-        LOGGER.info("resetPassword({}) - {}", resetPasswordRequestSO, authenticationResponse);
-        return authenticationResponse;
+        sendResetPasswordMail(locale, resetPasswordRequestSO, user);
     }
 
     public AuthenticationResponseSO signIn(SignInRequestSO signInRequestSO) {
@@ -138,8 +175,8 @@ public class AuthApiService {
     }
 
     @Transactional
-    public AuthenticationResponseSO signUp(SignUpRequestSO signUpRequestSO) {
-        LOGGER.debug("signUp({})", signUpRequestSO);
+    public AuthenticationResponseSO signUp(Locale locale, SignUpRequestSO signUpRequestSO) {
+        LOGGER.debug("signUp({},{})", locale, signUpRequestSO);
         captcha.checkTokenValid(signUpRequestSO.captchaText(), signUpRequestSO.captchaToken());
         if (userRepository.existsByUsername(signUpRequestSO.username().toLowerCase())) {
             throw ApplicationExceptionCode.USER_USERNAME_IS_USED.exception("Username is already taken.");
@@ -159,27 +196,9 @@ public class AuthApiService {
         user.setConfirmed(false);
         user.setEnabled(true);
         user = userRepository.save(user);
-        sendSignUpMail(signUpRequestSO, user);
+        sendSignUpMail(locale, signUpRequestSO, user);
         AuthenticationResponseSO authenticationResponse = createAuthenticationResponse(user);
         LOGGER.info("signUp({}) - {}", signUpRequestSO, authenticationResponse);
-        return authenticationResponse;
-    }
-
-    @Transactional
-    public AuthenticationResponseSO changeEmail(ChangeEmailRequestSO changeEmailRequestSO) {
-        LOGGER.debug("changeEmail({})", changeEmailRequestSO);
-        captcha.checkTokenValid(changeEmailRequestSO.captchaText(), changeEmailRequestSO.captchaToken());
-        if (userRepository.existsByEmail(changeEmailRequestSO.email().toLowerCase())) {
-            throw ApplicationExceptionCode.USER_EMAIL_IS_USED.exception("Email is already taken.");
-        }
-        UserSO userSO = (UserSO) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userRepository.findById(userSO.id()).orElseThrow(
-                () -> ApplicationExceptionCode.USER_NOT_FOUND.exception("User with id {0} not found.", userSO.id())
-        );
-        user.setEmail(changeEmailRequestSO.email().toLowerCase());
-        user = userRepository.save(user);
-        AuthenticationResponseSO authenticationResponse = createAuthenticationResponse(user);
-        LOGGER.info("changeEmail({}) - {}", changeEmailRequestSO, authenticationResponse);
         return authenticationResponse;
     }
 
@@ -218,15 +237,19 @@ public class AuthApiService {
         }
     }
 
-    private void sendResetPasswordMail(ResetPasswordRequestSO resetPasswordRequestSO, User user) {
-        LOGGER.debug("sendResetPasswordMail({},{})", resetPasswordRequestSO, user);
-        GlobalApplicationProperties globalApplicationProperties = applicationPropertyService.getGlobalApplicationProperties();
-        ResetPasswordMailProperties resetPasswordMailProperties = applicationPropertyService.getResetPasswordMailProperties();
+    private void sendResetPasswordMail(Locale locale, ResetPasswordRequestSO resetPasswordRequestSO, User user) {
+        LOGGER.debug("sendResetPasswordMail({},{},{})", locale, resetPasswordRequestSO, user);
+        GlobalApplicationProperties globalApplicationProperties = applicationPropertyService.getGlobalApplicationProperties(locale);
+        ResetPasswordMailProperties resetPasswordMailProperties = applicationPropertyService.getResetPasswordMailProperties(locale);
 
         Map<String, String> data = new HashMap<>();
         data.put(VerificationTokenKey.TYPE.name(), VerificationTokenType.RESET_PASSWORD.name());
         data.put(VerificationTokenKey.USER_ID.name(), user.getId().toString());
-        data.put(VerificationTokenKey.NEW_PASSWORD.name(), resetPasswordRequestSO.password());
+        data.put(VerificationTokenKey.NEW_PASSWORD.name(),
+                RandomString.INSTANCE()
+                        .alphaNumeric(2, 5, 3)
+                        .generate(10)
+        );
         long issuedAt = System.currentTimeMillis();
         String token = verificationToken.generateToken(
                 data,
@@ -243,7 +266,13 @@ public class AuthApiService {
                         MailTemplate.BASE,
                         new MailBaseContent(
                                 resetPasswordMailProperties.title(),
-                                resetPasswordMailProperties.message(),
+                                Arrays.asList(
+                                        resetPasswordMailProperties.message(),
+                                        MessageFormat.format(
+                                                resetPasswordMailProperties.passwordMessage(),
+                                                data.get(VerificationTokenKey.NEW_PASSWORD.name())
+                                        )
+                                ),
                                 new MailLink(
                                         getTokenUrl(globalApplicationProperties.webUrl(), token),
                                         resetPasswordMailProperties.link()
@@ -255,10 +284,10 @@ public class AuthApiService {
         ));
     }
 
-    private void sendSignUpMail(SignUpRequestSO signUpRequestSO, User user) {
-        LOGGER.debug("sendSignUpMail({},{})", signUpRequestSO, user);
-        GlobalApplicationProperties globalApplicationProperties = applicationPropertyService.getGlobalApplicationProperties();
-        SignUpMailProperties signUpMailProperties = applicationPropertyService.getSignUpMailProperties();
+    private void sendSignUpMail(Locale locale, SignUpRequestSO signUpRequestSO, User user) {
+        LOGGER.debug("sendSignUpMail({},{},{})", locale, signUpRequestSO, user);
+        GlobalApplicationProperties globalApplicationProperties = applicationPropertyService.getGlobalApplicationProperties(locale);
+        SignUpMailProperties signUpMailProperties = applicationPropertyService.getSignUpMailProperties(locale);
 
         Map<String, String> data = new HashMap<>();
         data.put(VerificationTokenKey.TYPE.name(), VerificationTokenType.SIGN_UP.name());
@@ -279,7 +308,7 @@ public class AuthApiService {
                         MailTemplate.BASE,
                         new MailBaseContent(
                                 signUpMailProperties.title(),
-                                signUpMailProperties.message(),
+                                Collections.singletonList(signUpMailProperties.message()),
                                 new MailLink(
                                         getTokenUrl(globalApplicationProperties.webUrl(), token),
                                         signUpMailProperties.link()

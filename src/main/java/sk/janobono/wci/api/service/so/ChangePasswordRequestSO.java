@@ -1,19 +1,19 @@
 package sk.janobono.wci.api.service.so;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
-public record ResetPasswordRequestSO(
-        @NotBlank @Size(max = 255) @Email String email,
+public record ChangePasswordRequestSO(
+        @NotBlank @Size(max = 255) String oldPassword,
+        @NotBlank @Size(max = 255) String newPassword,
         @NotBlank String captchaText,
         @NotBlank String captchaToken
 ) {
+
     @Override
     public String toString() {
-        return "ResetPasswordRequestSO{" +
-                "email='" + email + '\'' +
-                ", captchaText='" + captchaText + '\'' +
+        return "ChangePasswordRequestSO{" +
+                "captchaText='" + captchaText + '\'' +
                 ", captchaToken='" + captchaToken + '\'' +
                 '}';
     }

@@ -13,12 +13,13 @@ public enum ApplicationPropertyKey {
     RESET_PASSWORD_MAIL_SUBJECT(ApplicationPropertyGroup.RESET_PASSWORD_MAIL),
     RESET_PASSWORD_MAIL_TITLE(ApplicationPropertyGroup.RESET_PASSWORD_MAIL),
     RESET_PASSWORD_MAIL_MESSAGE(ApplicationPropertyGroup.RESET_PASSWORD_MAIL),
+    RESET_PASSWORD_MAIL_PASSWORD_MESSAGE(ApplicationPropertyGroup.RESET_PASSWORD_MAIL),
     RESET_PASSWORD_MAIL_LINK(ApplicationPropertyGroup.RESET_PASSWORD_MAIL),
 
-    SIGN_UP_MAIL_SUBJECT(ApplicationPropertyGroup.SIGN_UP_PASSWORD_MAIL),
-    SIGN_UP_MAIL_TITLE(ApplicationPropertyGroup.SIGN_UP_PASSWORD_MAIL),
-    SIGN_UP_MAIL_MESSAGE(ApplicationPropertyGroup.SIGN_UP_PASSWORD_MAIL),
-    SIGN_UP_MAIL_LINK(ApplicationPropertyGroup.SIGN_UP_PASSWORD_MAIL);
+    SIGN_UP_MAIL_SUBJECT(ApplicationPropertyGroup.SIGN_UP_MAIL),
+    SIGN_UP_MAIL_TITLE(ApplicationPropertyGroup.SIGN_UP_MAIL),
+    SIGN_UP_MAIL_MESSAGE(ApplicationPropertyGroup.SIGN_UP_MAIL),
+    SIGN_UP_MAIL_LINK(ApplicationPropertyGroup.SIGN_UP_MAIL);
 
     private final ApplicationPropertyGroup group;
 

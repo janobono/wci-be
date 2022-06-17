@@ -11,14 +11,12 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.RestTemplate;
 import sk.janobono.wci.BaseIntegrationTest;
 import sk.janobono.wci.api.service.so.*;
-import sk.janobono.wci.common.properties.GlobalApplicationProperties;
-import sk.janobono.wci.common.properties.ResetPasswordMailProperties;
-import sk.janobono.wci.common.properties.SignUpMailProperties;
 import sk.janobono.wci.component.Captcha;
+import sk.janobono.wci.config.ConfigProperties;
 import sk.janobono.wci.service.ApplicationPropertyService;
 
 import javax.mail.internet.MimeMessage;
-import java.util.concurrent.TimeUnit;
+import java.util.Locale;
 
 class AuthControllerIT extends BaseIntegrationTest {
 
@@ -51,6 +49,9 @@ class AuthControllerIT extends BaseIntegrationTest {
     public Captcha captcha;
 
     @Autowired
+    public ConfigProperties configProperties;
+
+    @Autowired
     public ApplicationPropertyService applicationPropertyService;
 
     @Test
@@ -60,9 +61,9 @@ class AuthControllerIT extends BaseIntegrationTest {
         RestTemplate restTemplate = restTemplateBuilder.build();
         restTemplate.getMessageConverters().add(0, converter);
 
-        prepareData();
+        Locale locale = new Locale("en");
 
-        String token = signUp(restTemplate);
+        String token = signUp(restTemplate, locale);
         LOGGER.debug("sign up token = {}", token);
 
         AuthenticationResponseSO authenticationResponseSO = confirm(restTemplate, token);
@@ -74,16 +75,20 @@ class AuthControllerIT extends BaseIntegrationTest {
         authenticationResponseSO = changeEmail(restTemplate, authenticationResponseSO);
         LOGGER.debug("change email = {}", authenticationResponseSO);
 
-        token = resetPassword(restTemplate);
+        authenticationResponseSO = changePassword(restTemplate, authenticationResponseSO);
+        LOGGER.debug("change password = {}", authenticationResponseSO);
+
+        String[] data = resetPassword(restTemplate, locale);
+        token = data[0];
         LOGGER.debug("reset password token = {}", token);
         authenticationResponseSO = confirm(restTemplate, token);
         LOGGER.debug("confirm02 = {}", authenticationResponseSO);
 
-        authenticationResponseSO = signIn(restTemplate, NEW_PASSWORD);
+        authenticationResponseSO = signIn(restTemplate, data[1]);
         LOGGER.debug("sign in = {}", authenticationResponseSO);
     }
 
-    private String signUp(RestTemplate restTemplate) throws Exception {
+    private String signUp(RestTemplate restTemplate, Locale locale) throws Exception {
         smtpServer.purgeEmailFromAllMailboxes();
 
         String captchaText = captcha.generateText();
@@ -114,7 +119,8 @@ class AuthControllerIT extends BaseIntegrationTest {
         );
 
         MimeMessage mimeMessage = smtpServer.getReceivedMessages()[0];
-        return getToken(mimeMessage, ">Please click to confirm to enable account.");
+        return getSubstring(mimeMessage, "token=", ">Please click to activate your account.")
+                .trim().replaceAll("\"", "");
     }
 
     private AuthenticationResponseSO confirm(RestTemplate restTemplate, String token) throws Exception {
@@ -173,7 +179,42 @@ class AuthControllerIT extends BaseIntegrationTest {
         return response.getBody();
     }
 
-    private String resetPassword(RestTemplate restTemplate) throws Exception {
+    private AuthenticationResponseSO changePassword(RestTemplate restTemplate, AuthenticationResponseSO authenticationResponseSO) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(authenticationResponseSO.bearer());
+
+        String captchaText = captcha.generateText();
+        String captchaToken = captcha.generateToken(captchaText);
+
+        restTemplate.exchange(
+                getUrl("/auth/change-password"),
+                HttpMethod.POST,
+                new HttpEntity<>(new ChangePasswordRequestSO(
+                        PASSWORD,
+                        NEW_PASSWORD,
+                        captchaText,
+                        captchaToken
+                ), headers),
+                AuthenticationResponseSO.class
+        );
+
+        ResponseEntity<AuthenticationResponseSO> response = restTemplate.exchange(
+                getUrl("/auth/change-password"),
+                HttpMethod.POST,
+                new HttpEntity<>(new ChangePasswordRequestSO(
+                        NEW_PASSWORD,
+                        PASSWORD,
+                        captchaText,
+                        captchaToken
+                ), headers),
+                AuthenticationResponseSO.class
+        );
+        return response.getBody();
+    }
+
+    private String[] resetPassword(RestTemplate restTemplate, Locale locale
+    ) throws Exception {
         smtpServer.purgeEmailFromAllMailboxes();
 
         String captchaText = captcha.generateText();
@@ -183,48 +224,31 @@ class AuthControllerIT extends BaseIntegrationTest {
                 getUrl("/auth/reset-password"),
                 new ResetPasswordRequestSO(
                         EMAIL,
-                        NEW_PASSWORD,
                         captchaText,
                         captchaToken
                 ),
-                AuthenticationResponseSO.class
+                Void.class
         );
 
         MimeMessage mimeMessage = smtpServer.getReceivedMessages()[0];
-        return getToken(mimeMessage, ">Please click to confirm password reset.");
+        return new String[]{
+                getSubstring(mimeMessage, "token=", ">Please click to activate password.")
+                        .trim().replaceAll("\"", ""),
+                getSubstring(mimeMessage, "New password: ", "<footer>")
+                        .replaceAll("</p>", "").replaceAll("</main>", "").trim()
+        };
     }
 
-    private String getToken(MimeMessage mimeMessage, String endSequence) throws Exception {
-        String token = mimeMessage.getContent().toString();
-        token = token.substring(
-                token.indexOf("token=") + 6,
-                token.indexOf(endSequence)
-        ).trim().replaceAll("\"", "");
-        return token;
+    private String getSubstring(MimeMessage mimeMessage, String startSequence, String endSequence) throws Exception {
+        String result = mimeMessage.getContent().toString();
+        result = result.substring(
+                result.indexOf(startSequence) + startSequence.length(),
+                result.indexOf(endSequence)
+        );
+        return result;
     }
 
     private String getUrl(String path) {
         return "http://localhost:" + serverPort + "/api" + path;
-    }
-
-    private void prepareData() {
-        applicationPropertyService.setGlobalApplicationProperties(new GlobalApplicationProperties(
-                "https://wci.com",
-                "wci@wci.com",
-                Long.valueOf(TimeUnit.DAYS.toMillis(1)).intValue(),
-                Long.valueOf(TimeUnit.DAYS.toMillis(1)).intValue()
-        ));
-        applicationPropertyService.setSignUpMailProperties(new SignUpMailProperties(
-                "Sign Up",
-                "Sign Up",
-                "Account creation message.",
-                "Please click to confirm to enable account."
-        ));
-        applicationPropertyService.setResetPasswordMailProperties(new ResetPasswordMailProperties(
-                "Reset Password",
-                "Reset Password",
-                "Password reset message.",
-                "Please click to confirm password reset."
-        ));
     }
 }

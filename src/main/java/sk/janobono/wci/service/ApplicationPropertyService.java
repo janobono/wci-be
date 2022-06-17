@@ -10,10 +10,12 @@ import sk.janobono.wci.common.properties.ResetPasswordMailProperties;
 import sk.janobono.wci.common.properties.SignUpMailProperties;
 import sk.janobono.wci.dal.domain.ApplicationProperty;
 import sk.janobono.wci.dal.domain.ApplicationPropertyGroup;
+import sk.janobono.wci.dal.domain.ApplicationPropertyId;
 import sk.janobono.wci.dal.domain.ApplicationPropertyKey;
 import sk.janobono.wci.dal.repository.ApplicationPropertyRepository;
 
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class ApplicationPropertyService {
@@ -27,9 +29,10 @@ public class ApplicationPropertyService {
         this.applicationPropertyRepository = applicationPropertyRepository;
     }
 
-    public GlobalApplicationProperties getGlobalApplicationProperties() {
-        LOGGER.debug("getGlobalApplicationProperties()");
-        List<ApplicationProperty> applicationProperties = applicationPropertyRepository.getApplicationPropertiesByGroup(ApplicationPropertyGroup.GLOBAL);
+    public GlobalApplicationProperties getGlobalApplicationProperties(Locale locale) {
+        LOGGER.debug("getGlobalApplicationProperties({})", locale);
+        List<ApplicationProperty> applicationProperties = applicationPropertyRepository
+                .getApplicationPropertiesById_LangAndGroup(locale.getLanguage(), ApplicationPropertyGroup.GLOBAL);
         return new GlobalApplicationProperties(
                 getPropertyValue(ApplicationPropertyKey.GLOBAL_WEB_URL, applicationProperties, ""),
                 getPropertyValue(ApplicationPropertyKey.GLOBAL_MAIL, applicationProperties, ""),
@@ -39,77 +42,80 @@ public class ApplicationPropertyService {
     }
 
     @Transactional
-    public void setGlobalApplicationProperties(GlobalApplicationProperties globalApplicationProperties) {
-        LOGGER.debug("setGlobalApplicationProperties({})", globalApplicationProperties);
+    public void setGlobalApplicationProperties(Locale locale, GlobalApplicationProperties globalApplicationProperties) {
+        LOGGER.debug("setGlobalApplicationProperties({},{})", locale, globalApplicationProperties);
 
         applicationPropertyRepository.save(new ApplicationProperty(
-                ApplicationPropertyKey.GLOBAL_WEB_URL,
+                new ApplicationPropertyId(ApplicationPropertyKey.GLOBAL_WEB_URL, locale.getLanguage()),
                 ApplicationPropertyGroup.GLOBAL,
                 globalApplicationProperties.webUrl()
         ));
 
         applicationPropertyRepository.save(new ApplicationProperty(
-                ApplicationPropertyKey.GLOBAL_MAIL,
+                new ApplicationPropertyId(ApplicationPropertyKey.GLOBAL_MAIL, locale.getLanguage()),
                 ApplicationPropertyGroup.GLOBAL,
                 globalApplicationProperties.mail()
         ));
 
         applicationPropertyRepository.save(new ApplicationProperty(
-                ApplicationPropertyKey.GLOBAL_SIGN_UP_TOKEN_EXPIRATION,
+                new ApplicationPropertyId(ApplicationPropertyKey.GLOBAL_SIGN_UP_TOKEN_EXPIRATION, locale.getLanguage()),
                 ApplicationPropertyGroup.GLOBAL,
                 globalApplicationProperties.signUpTokenExpiration().toString()
         ));
 
         applicationPropertyRepository.save(new ApplicationProperty(
-                ApplicationPropertyKey.GLOBAL_RESET_PASSWORD_TOKEN_EXPIRATION,
+                new ApplicationPropertyId(ApplicationPropertyKey.GLOBAL_RESET_PASSWORD_TOKEN_EXPIRATION, locale.getLanguage()),
                 ApplicationPropertyGroup.GLOBAL,
                 globalApplicationProperties.resetPasswordTokenExpiration().toString()
         ));
     }
 
-    public ResetPasswordMailProperties getResetPasswordMailProperties() {
-        LOGGER.debug("getResetPasswordMailProperties()");
-        List<ApplicationProperty> applicationProperties = applicationPropertyRepository.getApplicationPropertiesByGroup(ApplicationPropertyGroup.RESET_PASSWORD_MAIL);
+    public ResetPasswordMailProperties getResetPasswordMailProperties(Locale locale) {
+        LOGGER.debug("getResetPasswordMailProperties({})", locale);
+        List<ApplicationProperty> applicationProperties = applicationPropertyRepository
+                .getApplicationPropertiesById_LangAndGroup(locale.getLanguage(), ApplicationPropertyGroup.RESET_PASSWORD_MAIL);
         return new ResetPasswordMailProperties(
                 getPropertyValue(ApplicationPropertyKey.RESET_PASSWORD_MAIL_SUBJECT, applicationProperties, ""),
                 getPropertyValue(ApplicationPropertyKey.RESET_PASSWORD_MAIL_TITLE, applicationProperties, ""),
                 getPropertyValue(ApplicationPropertyKey.RESET_PASSWORD_MAIL_MESSAGE, applicationProperties, ""),
+                getPropertyValue(ApplicationPropertyKey.RESET_PASSWORD_MAIL_PASSWORD_MESSAGE, applicationProperties, ""),
                 getPropertyValue(ApplicationPropertyKey.RESET_PASSWORD_MAIL_LINK, applicationProperties, "")
         );
     }
 
     @Transactional
-    public void setResetPasswordMailProperties(ResetPasswordMailProperties resetPasswordMailProperties) {
-        LOGGER.debug("setResetPasswordMailProperties({})", resetPasswordMailProperties);
+    public void setResetPasswordMailProperties(Locale locale, ResetPasswordMailProperties resetPasswordMailProperties) {
+        LOGGER.debug("setResetPasswordMailProperties({},{})", locale, resetPasswordMailProperties);
 
         applicationPropertyRepository.save(new ApplicationProperty(
-                ApplicationPropertyKey.RESET_PASSWORD_MAIL_SUBJECT,
+                new ApplicationPropertyId(ApplicationPropertyKey.RESET_PASSWORD_MAIL_SUBJECT, locale.getLanguage()),
                 ApplicationPropertyGroup.RESET_PASSWORD_MAIL,
                 resetPasswordMailProperties.subject()
         ));
 
         applicationPropertyRepository.save(new ApplicationProperty(
-                ApplicationPropertyKey.RESET_PASSWORD_MAIL_TITLE,
+                new ApplicationPropertyId(ApplicationPropertyKey.RESET_PASSWORD_MAIL_TITLE, locale.getLanguage()),
                 ApplicationPropertyGroup.RESET_PASSWORD_MAIL,
                 resetPasswordMailProperties.title()
         ));
 
         applicationPropertyRepository.save(new ApplicationProperty(
-                ApplicationPropertyKey.RESET_PASSWORD_MAIL_MESSAGE,
+                new ApplicationPropertyId(ApplicationPropertyKey.RESET_PASSWORD_MAIL_MESSAGE, locale.getLanguage()),
                 ApplicationPropertyGroup.RESET_PASSWORD_MAIL,
                 resetPasswordMailProperties.message()
         ));
 
         applicationPropertyRepository.save(new ApplicationProperty(
-                ApplicationPropertyKey.RESET_PASSWORD_MAIL_LINK,
+                new ApplicationPropertyId(ApplicationPropertyKey.RESET_PASSWORD_MAIL_LINK, locale.getLanguage()),
                 ApplicationPropertyGroup.RESET_PASSWORD_MAIL,
                 resetPasswordMailProperties.link()
         ));
     }
 
-    public SignUpMailProperties getSignUpMailProperties() {
-        LOGGER.debug("getResetPasswordMailProperties()");
-        List<ApplicationProperty> applicationProperties = applicationPropertyRepository.getApplicationPropertiesByGroup(ApplicationPropertyGroup.SIGN_UP_PASSWORD_MAIL);
+    public SignUpMailProperties getSignUpMailProperties(Locale locale) {
+        LOGGER.debug("getResetPasswordMailProperties({})", locale);
+        List<ApplicationProperty> applicationProperties = applicationPropertyRepository
+                .getApplicationPropertiesById_LangAndGroup(locale.getLanguage(), ApplicationPropertyGroup.SIGN_UP_MAIL);
         return new SignUpMailProperties(
                 getPropertyValue(ApplicationPropertyKey.SIGN_UP_MAIL_SUBJECT, applicationProperties, ""),
                 getPropertyValue(ApplicationPropertyKey.SIGN_UP_MAIL_TITLE, applicationProperties, ""),
@@ -119,44 +125,44 @@ public class ApplicationPropertyService {
     }
 
     @Transactional
-    public void setSignUpMailProperties(SignUpMailProperties signUpMailProperties) {
+    public void setSignUpMailProperties(Locale locale, SignUpMailProperties signUpMailProperties) {
         LOGGER.debug("setResetPasswordMailProperties({})", signUpMailProperties);
 
         applicationPropertyRepository.save(new ApplicationProperty(
-                ApplicationPropertyKey.SIGN_UP_MAIL_SUBJECT,
-                ApplicationPropertyGroup.SIGN_UP_PASSWORD_MAIL,
+                new ApplicationPropertyId(ApplicationPropertyKey.SIGN_UP_MAIL_SUBJECT, locale.getLanguage()),
+                ApplicationPropertyGroup.SIGN_UP_MAIL,
                 signUpMailProperties.subject()
         ));
 
         applicationPropertyRepository.save(new ApplicationProperty(
-                ApplicationPropertyKey.SIGN_UP_MAIL_TITLE,
-                ApplicationPropertyGroup.SIGN_UP_PASSWORD_MAIL,
+                new ApplicationPropertyId(ApplicationPropertyKey.SIGN_UP_MAIL_TITLE, locale.getLanguage()),
+                ApplicationPropertyGroup.SIGN_UP_MAIL,
                 signUpMailProperties.title()
         ));
 
         applicationPropertyRepository.save(new ApplicationProperty(
-                ApplicationPropertyKey.SIGN_UP_MAIL_MESSAGE,
-                ApplicationPropertyGroup.SIGN_UP_PASSWORD_MAIL,
+                new ApplicationPropertyId(ApplicationPropertyKey.SIGN_UP_MAIL_MESSAGE, locale.getLanguage()),
+                ApplicationPropertyGroup.SIGN_UP_MAIL,
                 signUpMailProperties.message()
         ));
 
         applicationPropertyRepository.save(new ApplicationProperty(
-                ApplicationPropertyKey.SIGN_UP_MAIL_LINK,
-                ApplicationPropertyGroup.SIGN_UP_PASSWORD_MAIL,
+                new ApplicationPropertyId(ApplicationPropertyKey.SIGN_UP_MAIL_LINK, locale.getLanguage()),
+                ApplicationPropertyGroup.SIGN_UP_MAIL,
                 signUpMailProperties.link()
         ));
     }
 
     private String getPropertyValue(ApplicationPropertyKey key, List<ApplicationProperty> applicationProperties, String defaultValue) {
         return applicationProperties.stream()
-                .filter(prop -> prop.getKey() == key)
+                .filter(prop -> prop.getId().getKey() == key)
                 .map(ApplicationProperty::getValue)
                 .findFirst().orElse(defaultValue);
     }
 
     private Integer getPropertyValue(ApplicationPropertyKey key, List<ApplicationProperty> applicationProperties, Integer defaultValue) {
         return applicationProperties.stream()
-                .filter(prop -> prop.getKey() == key)
+                .filter(prop -> prop.getId().getKey() == key)
                 .map(prop -> Integer.valueOf(prop.getValue()))
                 .findFirst().orElse(defaultValue);
     }

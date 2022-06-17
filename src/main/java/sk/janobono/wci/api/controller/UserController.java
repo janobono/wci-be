@@ -12,8 +12,8 @@ import sk.janobono.wci.api.service.UserApiService;
 import sk.janobono.wci.api.service.so.UserDataSO;
 import sk.janobono.wci.api.service.so.UserProfileSO;
 import sk.janobono.wci.api.service.so.UserSO;
-import sk.janobono.wci.common.Authority;
 import sk.janobono.wci.api.service.so.UserSearchCriteriaSO;
+import sk.janobono.wci.common.Authority;
 
 import javax.validation.Valid;
 import java.util.List;

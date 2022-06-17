@@ -40,6 +40,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.cors().and().csrf().disable()
                 .authorizeHttpRequests()
+                .antMatchers("/application-properties").permitAll()
                 .antMatchers("/auth/confirm").permitAll()
                 .antMatchers("/auth/reset-password").permitAll()
                 .antMatchers("/auth/sign-in").permitAll()

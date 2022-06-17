@@ -54,6 +54,9 @@ docker-compose down
 | TOKEN_EXPIRES_IN   | 3600                                 |
 | TOKEN_PRIVATE_KEY  |                                      |
 | TOKEN_PUBLIC_KEY   |                                      |
+| APPLICATION_NAME   | WCI                                  |
+| APPLICATION_NAME   | WCI                                  |
+| APP_LANGUAGE_*     | * - index, value sk, en              |
 
 ## run just local services
 

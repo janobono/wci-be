@@ -8,10 +8,8 @@ import javax.persistence.*;
 @Table(name = "wci_application_property")
 public class ApplicationProperty {
 
-    @Id
-    @Column(name = "property_key")
-    @Enumerated(EnumType.STRING)
-    ApplicationPropertyKey key;
+    @EmbeddedId
+    private ApplicationPropertyId id;
 
     @Column(name = "property_group")
     @Enumerated(EnumType.STRING)
@@ -25,8 +23,8 @@ public class ApplicationProperty {
     public ApplicationProperty() {
     }
 
-    public ApplicationProperty(ApplicationPropertyKey key, ApplicationPropertyGroup group, String value) {
-        this.key = key;
+    public ApplicationProperty(ApplicationPropertyId id, ApplicationPropertyGroup group, String value) {
+        this.id = id;
         this.group = group;
         this.value = value;
     }
@@ -38,20 +36,20 @@ public class ApplicationProperty {
 
         ApplicationProperty that = (ApplicationProperty) o;
 
-        return key == that.key;
+        return id.equals(that.id);
     }
 
     @Override
     public int hashCode() {
-        return key != null ? key.hashCode() : 0;
+        return id != null ? id.hashCode() : 0;
     }
 
-    public ApplicationPropertyKey getKey() {
-        return key;
+    public ApplicationPropertyId getId() {
+        return id;
     }
 
-    public void setKey(ApplicationPropertyKey key) {
-        this.key = key;
+    public void setId(ApplicationPropertyId id) {
+        this.id = id;
     }
 
     public ApplicationPropertyGroup getGroup() {
@@ -73,7 +71,7 @@ public class ApplicationProperty {
     @Override
     public String toString() {
         return "ApplicationProperty{" +
-                "key=" + key +
+                "id=" + id +
                 ", group=" + group +
                 ", value='" + value + '\'' +
                 '}';
