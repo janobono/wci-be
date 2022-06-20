@@ -69,7 +69,7 @@ class AuthControllerIT extends BaseIntegrationTest {
         AuthenticationResponseSO authenticationResponseSO = confirm(restTemplate, token);
         LOGGER.debug("confirm01 = {}", authenticationResponseSO);
 
-        authenticationResponseSO = signIn(restTemplate, PASSWORD);
+        authenticationResponseSO = signIn(restTemplate, USERNAME, PASSWORD);
         LOGGER.debug("sign in = {}", authenticationResponseSO);
 
         authenticationResponseSO = changeEmail(restTemplate, authenticationResponseSO);
@@ -84,8 +84,23 @@ class AuthControllerIT extends BaseIntegrationTest {
         authenticationResponseSO = confirm(restTemplate, token);
         LOGGER.debug("confirm02 = {}", authenticationResponseSO);
 
-        authenticationResponseSO = signIn(restTemplate, data[1]);
+        authenticationResponseSO = signIn(restTemplate, USERNAME, data[1]);
         LOGGER.debug("sign in = {}", authenticationResponseSO);
+    }
+
+    @Test
+    public void defaultUsersTest() throws Exception {
+        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+        converter.setObjectMapper(objectMapper);
+        RestTemplate restTemplate = restTemplateBuilder.build();
+        restTemplate.getMessageConverters().add(0, converter);
+
+        Locale locale = new Locale("en");
+
+        signIn(restTemplate, "wci-admin", "admin123");
+        signIn(restTemplate, "wci-manager", "manager123");
+        signIn(restTemplate, "wci-employee", "employee123");
+        signIn(restTemplate, "wci-customer", "customer123");
     }
 
     private String signUp(RestTemplate restTemplate, Locale locale) throws Exception {
@@ -133,11 +148,11 @@ class AuthControllerIT extends BaseIntegrationTest {
         );
     }
 
-    private AuthenticationResponseSO signIn(RestTemplate restTemplate, String password) throws Exception {
+    private AuthenticationResponseSO signIn(RestTemplate restTemplate, String username, String password) throws Exception {
         return restTemplate.postForObject(
                 getUrl("/auth/sign-in"),
                 new SignInRequestSO(
-                        USERNAME,
+                        username,
                         password
                 ),
                 AuthenticationResponseSO.class
