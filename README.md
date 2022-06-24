@@ -56,7 +56,7 @@ docker-compose down
 | TOKEN_PUBLIC_KEY   |                                      |
 | APPLICATION_NAME   | WCI                                  |
 | APPLICATION_NAME   | WCI                                  |
-| APP_LANGUAGE_*     | * - index, value sk, en              |
+| APP_LANGUAGES_*    | * - index, value sk, en              |
 
 ## run just local services
 
