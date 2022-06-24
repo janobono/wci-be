@@ -2,6 +2,7 @@ package sk.janobono.wci.api.service.so;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 public record SignUpRequestSO(
@@ -13,13 +14,7 @@ public record SignUpRequestSO(
         @NotBlank @Size(max = 255) String lastName,
         @Size(max = 255) String titleAfter,
         @NotBlank @Size(max = 255) @Email String email,
-        @NotBlank @Size(max = 255) String phoneNumber,
-        @NotBlank @Size(max = 255) String company,
-        @NotBlank @Size(max = 255) String address,
-        @NotBlank @Size(max = 255) String city,
-        @NotBlank @Size(max = 255) String postalCode,
-        @NotBlank @Size(max = 255) String vatId,
-        @NotBlank @Size(max = 255) String contractorId,
+        @NotNull Boolean gdpr,
         @NotBlank String captchaText,
         @NotBlank String captchaToken
 ) {
@@ -33,13 +28,7 @@ public record SignUpRequestSO(
                 ", lastName='" + lastName + '\'' +
                 ", titleAfter='" + titleAfter + '\'' +
                 ", email='" + email + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", company='" + company + '\'' +
-                ", address='" + address + '\'' +
-                ", city='" + city + '\'' +
-                ", postalCode='" + postalCode + '\'' +
-                ", vatId='" + vatId + '\'' +
-                ", contractorId='" + contractorId + '\'' +
+                ", gdpr=" + gdpr +
                 ", captchaText='" + captchaText + '\'' +
                 ", captchaToken='" + captchaToken + '\'' +
                 '}';

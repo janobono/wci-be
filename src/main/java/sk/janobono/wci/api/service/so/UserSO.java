@@ -15,6 +15,7 @@ public record UserSO(
         String lastName,
         String titleAfter,
         String email,
+        Boolean gdpr,
         Boolean confirmed,
         Boolean enabled,
         List<Authority> authorities
@@ -22,8 +23,8 @@ public record UserSO(
     public static UserSO createUserSO(User user) {
         return new UserSO(
                 user.getId(), user.getUsername(), user.getTitleBefore(), user.getFirstName(), user.getMidName(),
-                user.getLastName(), user.getTitleAfter(), user.getEmail(), user.getConfirmed(), user.getEnabled(),
-                user.getAuthorities()
+                user.getLastName(), user.getTitleAfter(), user.getEmail(), user.getGdpr(), user.getConfirmed(),
+                user.getEnabled(), user.getAuthorities()
         );
     }
 }

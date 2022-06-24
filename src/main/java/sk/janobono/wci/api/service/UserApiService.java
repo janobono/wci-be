@@ -87,6 +87,7 @@ public class UserApiService {
         user.setLastName(userDataSO.lastName());
         user.setTitleAfter(userDataSO.titleAfter());
         user.setEmail(userDataSO.email().toLowerCase());
+        user.setGdpr(userDataSO.gdpr());
         user.setConfirmed(userDataSO.confirmed());
         user.setEnabled(userDataSO.enabled());
         user.setAuthorities(userDataSO.authorities());

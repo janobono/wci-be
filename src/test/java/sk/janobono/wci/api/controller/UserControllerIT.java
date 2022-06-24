@@ -93,6 +93,7 @@ class UserControllerIT extends BaseIntegrationTest {
                 "Last" + index,
                 "after" + index,
                 "mail" + index + "@domain.com",
+                true,
                 false,
                 false,
                 List.of(Authority.WCI_CUSTOMER)

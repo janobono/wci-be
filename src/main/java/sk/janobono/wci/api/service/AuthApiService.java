@@ -193,6 +193,7 @@ public class AuthApiService {
         user.setLastName(signUpRequestSO.lastName());
         user.setTitleAfter(signUpRequestSO.titleAfter());
         user.setEmail(signUpRequestSO.email().toLowerCase());
+        user.setGdpr(signUpRequestSO.gdpr());
         user.setConfirmed(false);
         user.setEnabled(true);
         user = userRepository.save(user);

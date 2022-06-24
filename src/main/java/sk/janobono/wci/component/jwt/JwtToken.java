@@ -86,6 +86,8 @@ public class JwtToken {
             jwtBuilder.withClaim("titleAfter", user.titleAfter());
             // email
             jwtBuilder.withClaim("email", user.email());
+            // gdpr
+            jwtBuilder.withClaim("gdpr", user.gdpr());
             // confirmed
             jwtBuilder.withClaim("confirmed", user.confirmed());
             // enabled
@@ -125,6 +127,8 @@ public class JwtToken {
         String titleAfter = jwt.getClaims().containsKey("titleAfter") ? jwt.getClaims().get("titleAfter").asString() : null;
         // email
         String email = jwt.getClaims().get("email").asString();
+        // gdpr
+        Boolean gdpr = jwt.getClaims().get("gdpr").asBoolean();
         // confirmed
         Boolean confirmed = jwt.getClaims().get("confirmed").asBoolean();
         // enabled
@@ -141,6 +145,7 @@ public class JwtToken {
                 lastName,
                 titleAfter,
                 email,
+                gdpr,
                 confirmed,
                 enabled,
                 Arrays.stream(authorities).map(Authority::byValue).collect(Collectors.toList())

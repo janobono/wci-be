@@ -30,13 +30,6 @@ class AuthControllerIT extends BaseIntegrationTest {
     public static final String LAST_NAME = "Pytlik";
     public static final String TITLE_AFTER = "Csc.";
     public static final String EMAIL = "jimbo.pytlik@domain.com";
-    public static final String PHONE_NUMBER = "+999 999 999 999";
-    public static final String COMPANY = "Pytlik Wood Inc.";
-    public static final String ADDRESS = "Underwood Street";
-    public static final String CITY = "Sincity";
-    public static final String POSTAL_CODE = "99999";
-    public static final String VAT_ID = "12345678";
-    public static final String CONTRACTOR_ID = "1234567890";
     public static final String NEW_PASSWORD = "newPass123";
 
     @Autowired
@@ -120,13 +113,7 @@ class AuthControllerIT extends BaseIntegrationTest {
                         LAST_NAME,
                         TITLE_AFTER,
                         EMAIL,
-                        PHONE_NUMBER,
-                        COMPANY,
-                        ADDRESS,
-                        CITY,
-                        POSTAL_CODE,
-                        VAT_ID,
-                        CONTRACTOR_ID,
+                        true,
                         captchaText,
                         captchaToken
                 ),

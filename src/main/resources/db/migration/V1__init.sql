@@ -24,6 +24,7 @@ create table wci_user
     last_name    varchar(255) collate "sk-SK-x-icu" not null,
     title_after  varchar(255),
     email        varchar(255)                       not null,
+    gdpr         bool                               not null,
     confirmed    bool                               not null,
     enabled      bool                               not null
 );
@@ -121,26 +122,27 @@ values ('SIGN_UP_MAIL_LINK', 'sk', 'SIGN_UP_MAIL', 'Kliknut√≠m aktivujete svoj √
 insert into wci_application_property (property_key, property_lang, property_group, property_value)
 values ('SIGN_UP_MAIL_LINK', 'en', 'SIGN_UP_MAIL', 'Please click to activate your account.');
 
-insert into wci_user (id, username, password, first_name, last_name, email, confirmed, enabled)
+insert into wci_user (id, username, password, first_name, last_name, email, gdpr, confirmed, enabled)
 values ('954ade48-a7ba-4ab7-889a-110929504766', 'wci-admin',
-        '$2a$12$ylzODaJ9Iv82eas9tWECdOH7Py78bBlmLoiA.gBF7J6XxMyntEgxq', 'wci', 'admin', 'wci.admin@wci.sk', true, true);
+        '$2a$12$ylzODaJ9Iv82eas9tWECdOH7Py78bBlmLoiA.gBF7J6XxMyntEgxq', 'wci', 'admin', 'wci.admin@wci.sk', true, true,
+        true);
 insert into wci_user_authority (user_id, authority)
 values ('954ade48-a7ba-4ab7-889a-110929504766', 'WCI_ADMIN');
-insert into wci_user (id, username, password, first_name, last_name, email, confirmed, enabled)
+insert into wci_user (id, username, password, first_name, last_name, email, gdpr, confirmed, enabled)
 values ('fdce1500-2f72-48b4-8a22-af09a044193d', 'wci-manager',
         '$2a$12$ZaapiFVtn0rTQuB4yu6UJ.3XtzrRy5Pf2AVfIwFjJ/Z1SQaqnaEGu', 'wci', 'manager', 'wci.manager@wci.sk', true,
-        true);
+        true, true);
 insert into wci_user_authority (user_id, authority)
 values ('fdce1500-2f72-48b4-8a22-af09a044193d', 'WCI_MANAGER');
-insert into wci_user (id, username, password, first_name, last_name, email, confirmed, enabled)
+insert into wci_user (id, username, password, first_name, last_name, email, gdpr, confirmed, enabled)
 values ('a9b935e9-151f-49a5-be04-1dfcda5c56b6', 'wci-employee',
         '$2a$12$AeS9MD7evnXB0kY5oe0RruUIZG2uuvArzLRWUt6TqE1ZwmsbLs2PS', 'wci', 'employee', 'wci.employee@wci.sk', true,
-        true);
+        true, true);
 insert into wci_user_authority (user_id, authority)
 values ('a9b935e9-151f-49a5-be04-1dfcda5c56b6', 'WCI_EMPLOYEE');
-insert into wci_user (id, username, password, first_name, last_name, email, confirmed, enabled)
+insert into wci_user (id, username, password, first_name, last_name, email, gdpr, confirmed, enabled)
 values ('c65f8205-7969-4b47-bf13-329624b4c57f', 'wci-customer',
         '$2a$12$2hViAbWWIcXm4wr6jUsb7OWE6MPWxzsrZ432Pfr9NkjZtPtIv3jra', 'wci', 'customer', 'wci.customer@wci.sk', true,
-        true);
+        true, true);
 insert into wci_user_authority (user_id, authority)
 values ('c65f8205-7969-4b47-bf13-329624b4c57f', 'WCI_CUSTOMER');

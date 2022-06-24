@@ -16,6 +16,7 @@ public record UserDataSO(
         @NotBlank @Size(max = 255) String lastName,
         @Size(max = 255) String titleAfter,
         @NotBlank @Size(max = 255) @Email String email,
+        @NotNull Boolean gdpr,
         @NotNull Boolean confirmed,
         @NotNull Boolean enabled,
         List<Authority> authorities
@@ -30,6 +31,7 @@ public record UserDataSO(
                 ", lastName='" + lastName + '\'' +
                 ", titleAfter='" + titleAfter + '\'' +
                 ", email='" + email + '\'' +
+                ", gdpr=" + gdpr +
                 ", confirmed=" + confirmed +
                 ", enabled=" + enabled +
                 ", authorities=" + authorities +

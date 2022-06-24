@@ -41,6 +41,9 @@ public class User {
     @Column(name = "email")
     private String email;
 
+    @Column(name = "gdpr")
+    private Boolean gdpr;
+
     @Column(name = "confirmed")
     private Boolean confirmed;
 
@@ -140,6 +143,14 @@ public class User {
         this.email = email;
     }
 
+    public Boolean getGdpr() {
+        return gdpr;
+    }
+
+    public void setGdpr(Boolean gdpr) {
+        this.gdpr = gdpr;
+    }
+
     public Boolean getConfirmed() {
         return confirmed;
     }
@@ -178,6 +189,7 @@ public class User {
                 ", lastName='" + lastName + '\'' +
                 ", titleAfter='" + titleAfter + '\'' +
                 ", email='" + email + '\'' +
+                ", gdpr=" + gdpr +
                 ", confirmed=" + confirmed +
                 ", enabled=" + enabled +
                 '}';
