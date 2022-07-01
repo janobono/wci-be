@@ -184,6 +184,9 @@ public class AuthApiService {
         if (userRepository.existsByEmail(signUpRequestSO.email().toLowerCase())) {
             throw ApplicationExceptionCode.USER_EMAIL_IS_USED.exception("Email is already taken.");
         }
+        if (!signUpRequestSO.gdpr()) {
+            throw ApplicationExceptionCode.GDPR.exception("GDPR must be true.");
+        }
         User user = new User();
         user.setUsername(signUpRequestSO.username().toLowerCase());
         user.setPassword(passwordEncoder.encode(signUpRequestSO.password()));

@@ -9,7 +9,9 @@ public enum ApplicationExceptionCode {
     USER_IS_DISABLED,
     USER_NOT_FOUND,
     USER_USERNAME_IS_USED,
-    USER_EMAIL_IS_USED;
+    USER_EMAIL_IS_USED,
+    GDPR,
+    UNSUPPORTED_LOCALE;
 
     public ApplicationException exception(String pattern, Object... arguments) {
         return exception(null, pattern, arguments);

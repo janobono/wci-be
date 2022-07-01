@@ -67,6 +67,31 @@ create index idx_wci_user on wci_user (username);
 create index idx_wci_user_authority on wci_user_authority (user_id);
 
 -- DATA
+insert into wci_user (id, username, password, first_name, last_name, email, gdpr, confirmed, enabled)
+values ('954ade48-a7ba-4ab7-889a-110929504766', 'wci-admin',
+        '$2a$12$ylzODaJ9Iv82eas9tWECdOH7Py78bBlmLoiA.gBF7J6XxMyntEgxq', 'wci', 'admin', 'wci.admin@wci.sk', true, true,
+        true);
+insert into wci_user_authority (user_id, authority)
+values ('954ade48-a7ba-4ab7-889a-110929504766', 'WCI_ADMIN');
+insert into wci_user (id, username, password, first_name, last_name, email, gdpr, confirmed, enabled)
+values ('fdce1500-2f72-48b4-8a22-af09a044193d', 'wci-manager',
+        '$2a$12$ZaapiFVtn0rTQuB4yu6UJ.3XtzrRy5Pf2AVfIwFjJ/Z1SQaqnaEGu', 'wci', 'manager', 'wci.manager@wci.sk', true,
+        true, true);
+insert into wci_user_authority (user_id, authority)
+values ('fdce1500-2f72-48b4-8a22-af09a044193d', 'WCI_MANAGER');
+insert into wci_user (id, username, password, first_name, last_name, email, gdpr, confirmed, enabled)
+values ('a9b935e9-151f-49a5-be04-1dfcda5c56b6', 'wci-employee',
+        '$2a$12$AeS9MD7evnXB0kY5oe0RruUIZG2uuvArzLRWUt6TqE1ZwmsbLs2PS', 'wci', 'employee', 'wci.employee@wci.sk', true,
+        true, true);
+insert into wci_user_authority (user_id, authority)
+values ('a9b935e9-151f-49a5-be04-1dfcda5c56b6', 'WCI_EMPLOYEE');
+insert into wci_user (id, username, password, first_name, last_name, email, gdpr, confirmed, enabled)
+values ('c65f8205-7969-4b47-bf13-329624b4c57f', 'wci-customer',
+        '$2a$12$2hViAbWWIcXm4wr6jUsb7OWE6MPWxzsrZ432Pfr9NkjZtPtIv3jra', 'wci', 'customer', 'wci.customer@wci.sk', true,
+        true, true);
+insert into wci_user_authority (user_id, authority)
+values ('c65f8205-7969-4b47-bf13-329624b4c57f', 'WCI_CUSTOMER');
+
 insert into wci_application_property (property_key, property_lang, property_group, property_value)
 values ('GLOBAL_WEB_URL', 'sk', 'GLOBAL', 'http://change-me.sk');
 insert into wci_application_property (property_key, property_lang, property_group, property_value)
@@ -122,27 +147,18 @@ values ('SIGN_UP_MAIL_LINK', 'sk', 'SIGN_UP_MAIL', 'Kliknutím aktivujete svoj �
 insert into wci_application_property (property_key, property_lang, property_group, property_value)
 values ('SIGN_UP_MAIL_LINK', 'en', 'SIGN_UP_MAIL', 'Please click to activate your account.');
 
-insert into wci_user (id, username, password, first_name, last_name, email, gdpr, confirmed, enabled)
-values ('954ade48-a7ba-4ab7-889a-110929504766', 'wci-admin',
-        '$2a$12$ylzODaJ9Iv82eas9tWECdOH7Py78bBlmLoiA.gBF7J6XxMyntEgxq', 'wci', 'admin', 'wci.admin@wci.sk', true, true,
-        true);
-insert into wci_user_authority (user_id, authority)
-values ('954ade48-a7ba-4ab7-889a-110929504766', 'WCI_ADMIN');
-insert into wci_user (id, username, password, first_name, last_name, email, gdpr, confirmed, enabled)
-values ('fdce1500-2f72-48b4-8a22-af09a044193d', 'wci-manager',
-        '$2a$12$ZaapiFVtn0rTQuB4yu6UJ.3XtzrRy5Pf2AVfIwFjJ/Z1SQaqnaEGu', 'wci', 'manager', 'wci.manager@wci.sk', true,
-        true, true);
-insert into wci_user_authority (user_id, authority)
-values ('fdce1500-2f72-48b4-8a22-af09a044193d', 'WCI_MANAGER');
-insert into wci_user (id, username, password, first_name, last_name, email, gdpr, confirmed, enabled)
-values ('a9b935e9-151f-49a5-be04-1dfcda5c56b6', 'wci-employee',
-        '$2a$12$AeS9MD7evnXB0kY5oe0RruUIZG2uuvArzLRWUt6TqE1ZwmsbLs2PS', 'wci', 'employee', 'wci.employee@wci.sk', true,
-        true, true);
-insert into wci_user_authority (user_id, authority)
-values ('a9b935e9-151f-49a5-be04-1dfcda5c56b6', 'WCI_EMPLOYEE');
-insert into wci_user (id, username, password, first_name, last_name, email, gdpr, confirmed, enabled)
-values ('c65f8205-7969-4b47-bf13-329624b4c57f', 'wci-customer',
-        '$2a$12$2hViAbWWIcXm4wr6jUsb7OWE6MPWxzsrZ432Pfr9NkjZtPtIv3jra', 'wci', 'customer', 'wci.customer@wci.sk', true,
-        true, true);
-insert into wci_user_authority (user_id, authority)
-values ('c65f8205-7969-4b47-bf13-329624b4c57f', 'WCI_CUSTOMER');
+-- "cookies-info": {
+--     "website-instructions": "This website makes use of cookies to enhance the browsing experience and provide additional functionality.",
+--     "personal-instructions": "None of this data can or will be used to identify or contact you.",
+--     "agree-instructions": "By clicking Allow cookies you give your permission to this website to store small bits of data on your device.",
+--     "learn-instructions": "To learn more about cookies and localStorage, visit",
+--     "disable-instructions": "To disable all cookies through the browser, click on the corresponding link and follow the instructions:"
+--   },
+--
+--       "cookies-info": {
+--     "website-instructions": "Táto webová stránka používa súbory cookie na zlepšenie zážitku z prehliadania a poskytovanie dodatočných funkcií.",
+--     "personal-instructions": "Žiadne z týchto údajov nemožno a ani nebudú použité na vašu identifikáciu alebo kontaktovanie.",
+--     "agree-instructions": "Kliknutím na položku Povoliť cookies dávate tejto webovej lokalite povolenie na ukladanie malých kúskov údajov na vašom zariadení.",
+--     "learn-instructions": "Ak sa chcete dozvedieť viac o cookies a localStorage, navštívte",
+--     "disable-instructions": "Ak chcete zakázať všetky súbory cookie prostredníctvom prehliadača, kliknite na príslušný odkaz a postupujte podľa pokynov:"
+--   },

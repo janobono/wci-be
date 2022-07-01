@@ -5,9 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sk.janobono.wci.common.exception.ApplicationExceptionCode;
 import sk.janobono.wci.common.properties.GlobalApplicationProperties;
 import sk.janobono.wci.common.properties.ResetPasswordMailProperties;
 import sk.janobono.wci.common.properties.SignUpMailProperties;
+import sk.janobono.wci.config.ConfigProperties;
 import sk.janobono.wci.dal.domain.ApplicationProperty;
 import sk.janobono.wci.dal.domain.ApplicationPropertyGroup;
 import sk.janobono.wci.dal.domain.ApplicationPropertyId;
@@ -22,15 +24,20 @@ public class ApplicationPropertyService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationPropertyService.class);
 
+    private ConfigProperties configProperties;
+
     private ApplicationPropertyRepository applicationPropertyRepository;
 
     @Autowired
-    public void setApplicationPropertyRepository(ApplicationPropertyRepository applicationPropertyRepository) {
+    public void setApplicationPropertyRepository(ConfigProperties configProperties, ApplicationPropertyRepository applicationPropertyRepository) {
+        this.configProperties = configProperties;
         this.applicationPropertyRepository = applicationPropertyRepository;
     }
 
     public GlobalApplicationProperties getGlobalApplicationProperties(Locale locale) {
         LOGGER.debug("getGlobalApplicationProperties({})", locale);
+        checkLocale(locale);
+
         List<ApplicationProperty> applicationProperties = applicationPropertyRepository
                 .getApplicationPropertiesById_LangAndGroup(locale.getLanguage(), ApplicationPropertyGroup.GLOBAL);
         return new GlobalApplicationProperties(
@@ -44,6 +51,7 @@ public class ApplicationPropertyService {
     @Transactional
     public void setGlobalApplicationProperties(Locale locale, GlobalApplicationProperties globalApplicationProperties) {
         LOGGER.debug("setGlobalApplicationProperties({},{})", locale, globalApplicationProperties);
+        checkLocale(locale);
 
         applicationPropertyRepository.save(new ApplicationProperty(
                 new ApplicationPropertyId(ApplicationPropertyKey.GLOBAL_WEB_URL, locale.getLanguage()),
@@ -72,6 +80,8 @@ public class ApplicationPropertyService {
 
     public ResetPasswordMailProperties getResetPasswordMailProperties(Locale locale) {
         LOGGER.debug("getResetPasswordMailProperties({})", locale);
+        checkLocale(locale);
+
         List<ApplicationProperty> applicationProperties = applicationPropertyRepository
                 .getApplicationPropertiesById_LangAndGroup(locale.getLanguage(), ApplicationPropertyGroup.RESET_PASSWORD_MAIL);
         return new ResetPasswordMailProperties(
@@ -86,6 +96,7 @@ public class ApplicationPropertyService {
     @Transactional
     public void setResetPasswordMailProperties(Locale locale, ResetPasswordMailProperties resetPasswordMailProperties) {
         LOGGER.debug("setResetPasswordMailProperties({},{})", locale, resetPasswordMailProperties);
+        checkLocale(locale);
 
         applicationPropertyRepository.save(new ApplicationProperty(
                 new ApplicationPropertyId(ApplicationPropertyKey.RESET_PASSWORD_MAIL_SUBJECT, locale.getLanguage()),
@@ -114,6 +125,8 @@ public class ApplicationPropertyService {
 
     public SignUpMailProperties getSignUpMailProperties(Locale locale) {
         LOGGER.debug("getResetPasswordMailProperties({})", locale);
+        checkLocale(locale);
+
         List<ApplicationProperty> applicationProperties = applicationPropertyRepository
                 .getApplicationPropertiesById_LangAndGroup(locale.getLanguage(), ApplicationPropertyGroup.SIGN_UP_MAIL);
         return new SignUpMailProperties(
@@ -127,6 +140,7 @@ public class ApplicationPropertyService {
     @Transactional
     public void setSignUpMailProperties(Locale locale, SignUpMailProperties signUpMailProperties) {
         LOGGER.debug("setResetPasswordMailProperties({})", signUpMailProperties);
+        checkLocale(locale);
 
         applicationPropertyRepository.save(new ApplicationProperty(
                 new ApplicationPropertyId(ApplicationPropertyKey.SIGN_UP_MAIL_SUBJECT, locale.getLanguage()),
@@ -151,6 +165,12 @@ public class ApplicationPropertyService {
                 ApplicationPropertyGroup.SIGN_UP_MAIL,
                 signUpMailProperties.link()
         ));
+    }
+
+    private void checkLocale(Locale locale) {
+        if (!configProperties.languages().contains(locale.getLanguage())) {
+            throw ApplicationExceptionCode.UNSUPPORTED_LOCALE.exception("Unsupported locale.");
+        }
     }
 
     private String getPropertyValue(ApplicationPropertyKey key, List<ApplicationProperty> applicationProperties, String defaultValue) {
